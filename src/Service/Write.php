@@ -6,29 +6,17 @@ use App\DTO\FamilyTreeData;
 use App\DTO\Locations;
 use App\Entity\FamilyTree;
 use App\Exception\FamilyTreeException;
-use App\Repository\FamilyTreeRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityNotFoundException;
-use Symfony\Component\Uid\Uuid;
 
 class Write
 {
     private EntityManagerInterface $em;
-    private FamilyTreeRepository   $fTrees;
+    private Read                   $read;
 
-    public function __construct(EntityManagerInterface $em, FamilyTreeRepository $fTrees)
+    public function __construct(EntityManagerInterface $em, Read $read)
     {
         $this->em = $em;
-        $this->fTrees = $fTrees;
-    }
-
-    public function getRecord(Uuid $uuid): FamilyTree
-    {
-        $ft = $this->fTrees->findOneBy(['uuid' => $uuid]);
-        if (null === $ft) {
-            throw EntityNotFoundException::fromClassNameAndIdentifier(FamilyTree::class, [$uuid]);
-        }
-        return $ft;
+        $this->read = $read;
     }
 
     public function one(FamilyTreeData $data): FamilyTree
@@ -61,7 +49,7 @@ class Write
     {
         foreach ($data as $locations) {
             /** @var Locations $locations */
-            $ft = $this->getRecord($locations->uuid);
+            $ft = $this->read->aggregateOne($locations->uuid);
             $ft->updateLocations($locations->firstLocation, $locations->currentLocation);
         }
         $this->em->flush();

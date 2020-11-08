@@ -25,4 +25,13 @@ class Read
         }
         return $ft;
     }
+
+    public function aggregateOne(UuidV4 $uuid): FamilyTree
+    {
+        $ft = $this->fTrees->findOneBy(['uuid' => $uuid]);
+        if (null === $ft) {
+            throw EntityNotFoundException::fromClassNameAndIdentifier(FamilyTree::class, [$uuid]);
+        }
+        return $ft;
+    }
 }
