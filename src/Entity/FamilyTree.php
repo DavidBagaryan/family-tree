@@ -44,15 +44,44 @@ class FamilyTree
      */
     private ?string $currentLocation = null;
 
-    public function __construct(UuidV4 $uuid)
-    {
-        $this->uuid = $uuid;
-    }
+    /**
+     * @var StoredEvent[]
+     */
+    private array $events = [];
 
-    public function newFamily(int $members, string $surname): void
+    public function __construct(int $members, string $surname)
     {
+        $this->uuid = UuidV4::v4();
+        $this->events[] = new FamilyTreeCreated($this->uuid, [
+            'surname' => $surname,
+            'members' => $members,
+        ]);
+
         $this->members = $members;
         $this->surname = $surname;
+    }
+
+    public function updateLocations(?string $firstLocation, ?string $currentLocation): void
+    {
+        $this->events[] = new LocationsUpdated($this->uuid, [
+            'firstLocation'   => $firstLocation,
+            'currentLocation' => $currentLocation,
+        ]);
+
+        $this->firstLocation = $firstLocation;
+        $this->currentLocation = $currentLocation;
+    }
+
+    public function uuid(): UuidV4
+    {
+        return $this->uuid;
+    }
+
+    public function popEvents(): array
+    {
+        $events = $this->events;
+        $this->events = [];
+        return $events;
     }
 
     public function data(): FamilyTreeData

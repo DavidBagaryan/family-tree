@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 
-class DTOArgumentValueResolver implements ArgumentValueResolverInterface
+class DTOArgumentResolver implements ArgumentValueResolverInterface
 {
     private SerializerInterface $serializer;
 
@@ -23,7 +23,6 @@ class DTOArgumentValueResolver implements ArgumentValueResolverInterface
 
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
-
         yield $this->serializer->deserialize($request->getContent(), $argument->getType(), 'json');
     }
 }

@@ -3,9 +3,8 @@
 namespace App\Controller;
 
 use App\DTO\FamilyTreeData;
-use App\Exception\FamilyTreeException;
-use App\Service\FamilyTree;
-use Doctrine\ORM\EntityNotFoundException;
+use App\Service\Read;
+use App\Service\Write;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -18,15 +17,9 @@ class FamilyTreeController extends AbstractController
     /**
      * @Route("/family-tree", methods={"POST"})
      */
-    public function create(FamilyTreeData $data, FamilyTree\Creating $creating, FamilyTree\Read $read): Response
+    public function create(FamilyTreeData $data, Write $write, Read $read): Response
     {
-        try {
-            $uuid = $creating->handle($data);
-            return $this->json($read->one($uuid)->data(), Response::HTTP_CREATED);
-        } catch (FamilyTreeException $e) {
-            return $this->json($e->getMessage(), Response::HTTP_BAD_REQUEST);
-        } catch (EntityNotFoundException $e) {
-            return $this->json($e->getMessage(), Response::HTTP_NOT_FOUND);
-        }
+        $ft = $write->one($data);
+        return $this->json($read->one( $ft->uuid())->data(), Response::HTTP_CREATED);
     }
 }

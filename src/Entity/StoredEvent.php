@@ -2,16 +2,16 @@
 
 namespace App\Entity;
 
-use App\Repository\StoredEventRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\UuidV4;
 
 /**
- * @ORM\Entity(repositoryClass=StoredEventRepository::class)
+ * @ORM\Entity()
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="event_type", type="string")
  * @ORM\DiscriminatorMap({
- *     "FamilyTreeCreated"=FamilyTreeCreated::class
+ *     "FamilyTreeCreated"=FamilyTreeCreated::class,
+ *     "LocationsUpdated"=LocationsUpdated::class
  * })
  */
 abstract class StoredEvent
@@ -24,18 +24,18 @@ abstract class StoredEvent
     protected ?int $id = null;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="guid")
      */
-    protected UuidV4 $aggregateUUID;
+    protected UuidV4 $familyTreeId;
 
     /**
      * @ORM\Column(type="json")
      */
     protected array $eventData = [];
 
-    public function __construct(UuidV4 $uuidV4, array $eventData)
+    public function __construct(UuidV4 $ftId, array $eventData)
     {
-        $this->aggregateUUID = $uuidV4;
+        $this->familyTreeId = $ftId;
         $this->eventData = $eventData;
     }
 }
