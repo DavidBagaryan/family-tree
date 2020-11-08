@@ -27,12 +27,12 @@ class FamilyTree
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private int $members;
+    private int $members = 0;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private string $surname;
+    private ?string $surname = null;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -49,19 +49,37 @@ class FamilyTree
      */
     private array $events = [];
 
-    public function __construct(int $members, string $surname)
+    public function __construct()
     {
         $this->uuid = UuidV4::v4();
-        $this->events[] = new FamilyTreeCreated($this->uuid, [
-            'surname' => $surname,
-            'members' => $members,
-        ]);
-
-        $this->members = $members;
-        $this->surname = $surname;
     }
 
-    public function updateLocations(?string $firstLocation, ?string $currentLocation): void
+    public function initiate(FamilyTreeData $data): self
+    {
+        $members = $data->members;
+        $surname = $data->surname;
+
+        if (null === $members || $members <= 0) {
+            $this->events[] = new AttemptToAddLessThanOneMemberFamilyTree($this->uuid, (array)$data);
+        }
+
+        if (empty($surname)) {
+            $this->events[] = new AttemptToMakeEmptySurnameFamilyTree($this->uuid, (array)$data);
+        }
+
+        if (null !== $members && $members > 0 && !empty($surname)) {
+            $this->events[] = new FamilyTreeCreated($this->uuid, [
+                'surname' => $surname,
+                'members' => $members,
+            ]);
+            $this->members = $members;
+            $this->surname = $surname;
+        }
+
+        return $this;
+    }
+
+    public function updateLocations(?string $firstLocation, ?string $currentLocation): self
     {
         $this->events[] = new LocationsUpdated($this->uuid, [
             'firstLocation'   => $firstLocation,
@@ -70,6 +88,7 @@ class FamilyTree
 
         $this->firstLocation = $firstLocation;
         $this->currentLocation = $currentLocation;
+        return $this;
     }
 
     public function uuid(): UuidV4

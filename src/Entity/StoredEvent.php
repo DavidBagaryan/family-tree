@@ -11,7 +11,10 @@ use Symfony\Component\Uid\UuidV4;
  * @ORM\DiscriminatorColumn(name="event_type", type="string")
  * @ORM\DiscriminatorMap({
  *     "FamilyTreeCreated"=FamilyTreeCreated::class,
- *     "LocationsUpdated"=LocationsUpdated::class
+ *     "LocationsUpdated"=LocationsUpdated::class,
+ *
+ *     "AttemptToAddLessThanOneMemberFamilyTree"=AttemptToAddLessThanOneMemberFamilyTree::class,
+ *     "AttemptToMakeEmptySurnameFamilyTree"=AttemptToMakeEmptySurnameFamilyTree::class
  * })
  */
 abstract class StoredEvent
@@ -31,9 +34,9 @@ abstract class StoredEvent
     /**
      * @ORM\Column(type="json")
      */
-    protected array $eventData = [];
+    protected array $eventData;
 
-    public function __construct(UuidV4 $ftId, array $eventData)
+    public function __construct(UuidV4 $ftId, array $eventData = [])
     {
         $this->familyTreeId = $ftId;
         $this->eventData = $eventData;
